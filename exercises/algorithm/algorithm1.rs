@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,14 +68,59 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+}
+
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
+    pub fn merge(mut list_a:LinkedList<T>, mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut ret = Self::new();
+        while list_a.start != None && list_b.start != None {
+            let mut va = match list_a.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).val.clone()},
+                None => todo!(),
+            };
+            let mut vb = match list_b.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).val.clone()},
+                None => todo!(),
+            };
+            if va < vb {
+                ret.add(va);
+                list_a.start = match list_a.start {
+                    Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).next},
+                    None => None,
+                };
+            }
+            else {
+                ret.add(vb);
+                list_b.start = match list_b.start {
+                    Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).next},
+                    None => None,
+                };
+            }
         }
+        while list_a.start != None {
+            let va = match list_a.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).val.clone()},
+                None => todo!(),
+            };
+            ret.add(va);
+            list_a.start = match list_a.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).next},
+                None => None,
+            };
+        }
+        while list_b.start != None {
+            let vb = match list_b.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).val.clone()},
+                None => todo!(),
+            };
+            ret.add(vb);
+            list_b.start = match list_b.start {
+                Some(current_ptr) => unsafe{(*current_ptr.as_ptr()).next},
+                None => None,
+            };
+        }
+        ret
 	}
 }
 

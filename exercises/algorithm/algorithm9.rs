@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -21,11 +20,13 @@ where
     T: Default,
 {
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
-        Self {
+        let mut ret = Self {
             count: 0,
             items: vec![T::default()],
             comparator,
-        }
+        };
+        // ret.items.push(T::default());
+        ret
     }
 
     pub fn len(&self) -> usize {
@@ -37,7 +38,21 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count = self.count + 1;
+        let mut idx = self.items.len() - 1;
+        
+        loop {
+            if idx == 1 {
+                break; // 已经是根节点
+            }
+            let parent_idx = idx / 2;
+            if (self.comparator)(&self.items[parent_idx], &self.items[idx]) {
+                break; // 满足堆性质
+            }
+            self.items.swap(idx, parent_idx);
+            idx = parent_idx;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +73,15 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		if self.children_present(self.left_child_idx(idx)) {
+            self.left_child_idx(idx)
+        }
+        else if self.children_present(self.right_child_idx(idx)){
+            self.right_child_idx(idx)
+        }
+        else {
+            0
+        }
     }
 }
 
@@ -79,13 +102,43 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + std::cmp::PartialOrd,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        let item = self.items.swap_remove(1);
+        self.count -= 1;
+        
+        if self.items.len() > 1 {
+            let mut idx = 1;
+            loop {
+                let left = 2 * idx;
+                let right = 2 * idx + 1;
+                let mut smallest = idx;
+
+                if left < self.items.len() && !(self.comparator)(&self.items[smallest], &self.items[left]) {
+                    smallest = left;
+                }
+
+                if right < self.items.len() && !(self.comparator)(&self.items[smallest], &self.items[right]) {
+                    smallest = right;
+                }
+
+                if smallest != idx {
+                    self.items.swap(idx, smallest);
+                    idx = smallest;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        Some(item)
     }
 }
 
